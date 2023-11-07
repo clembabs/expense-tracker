@@ -6,13 +6,19 @@ import {
   getExpenses,
   updateExpenseById,
 } from "../models/expense";
+import {
+  createNotification,
+  getExpenseNotifications,
+} from "../models/notification";
+import { getUserId } from "../helpers/index";
 
 export const getAllExpenses = async (
   req: express.Request,
   res: express.Response
 ) => {
   try {
-    const users = await getExpenses();
+    const currentUserId = getUserId(req);
+    const users = await getExpenses(currentUserId);
     return res.status(200).json(users);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -67,18 +73,28 @@ export const addExpense = async (
         .status(400)
         .json({ message: "Amount must be a positive number!" });
     }
-
-    const Expense = createExpense({
+    const currentUserId = getUserId(req);
+    const expense =await createExpense({
       title,
       amount,
       category,
       description,
       date,
+      userId: currentUserId
     });
+
+    if (expense != null) {
+       createNotification({
+        topic: "You have added an income of " + amount,
+        expense,
+        date,
+        userId: currentUserId,
+      });
+    }
 
     return res
       .status(200)
-      .json({ message: "Expense Added", Expense: Expense })
+      .json({ message: "Expense Added", expense: expense })
       .end();
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -103,11 +119,24 @@ export const updateExpense = async (
 
     const expense = await getExpenseById(id);
 
-    const updatedExpense = updateExpenseById(expense.id, req.body);
+    const updatedExpense = await updateExpenseById(expense.id, req.body);
     return res
       .status(200)
       .json({ message: "Expense Updated", Expense: updatedExpense })
       .end();
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const getAllExpensesNotifications = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  try {
+    const currentUserId = getUserId(req);
+    const expensesNotifications = await getExpenseNotifications(currentUserId);
+    return res.status(200).json(expensesNotifications);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

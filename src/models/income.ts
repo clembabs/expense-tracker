@@ -34,13 +34,17 @@ const IncomeSchema = new mongoose.Schema(
       maxLength: 20,
       trim: true,
     },
+    userId: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
 export const IncomeModel = mongoose.model("Income", IncomeSchema);
 
-export const getIncomes = () => IncomeModel.find();
+export const getIncomes = (id: string) => IncomeModel.find({userId:id });
 export const getIncomeById = (id: string) => IncomeModel.findById(id);
 export const createIncome = (values: Record<string, any>) =>
   new IncomeModel(values).save().then((income) => income.toObject());

@@ -34,13 +34,17 @@ const ExpenseSchema = new mongoose.Schema(
       maxLength: 20,
       trim: true,
     },
+    userId: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
 export const ExpenseModel = mongoose.model("Expense", ExpenseSchema);
 
-export const getExpenses = () => ExpenseModel.find();
+export const getExpenses = (id: string)  => ExpenseModel.find({userId:id });
 export const getExpenseById = (id: string) => ExpenseModel.findById(id);
 export const createExpense = (values: Record<string, any>) =>
   new ExpenseModel(values).save().then((Expense) => Expense.toObject());

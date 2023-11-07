@@ -6,13 +6,17 @@ import {
   getIncomes,
   updateIncomeById,
 } from "../models/income";
+import { createNotification, getIncomeNotifications } from "../models/notification";
+import { getUserId } from "../helpers/index";
+
 
 export const getAllIncomes = async (
   req: express.Request,
   res: express.Response
 ) => {
   try {
-    const users = await getIncomes();
+    const currentUserId = getUserId(req);
+    const users = await getIncomes(currentUserId);
     return res.status(200).json(users);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -68,13 +72,26 @@ export const addIncome = async (
         .json({ message: "Amount must be a positive number!" });
     }
 
-    const income = createIncome({
+    const currentUserId = getUserId(req);
+  
+
+    const income = await createIncome({
       title,
       amount,
       category,
       description,
       date,
+      userId: currentUserId,
     });
+
+    if (income != null) {
+      await createNotification({
+        topic: 'You have added an income of ' + amount,
+        income,
+        date,
+        userId: currentUserId,
+      })
+    }
 
     return res
       .status(200)
@@ -112,3 +129,18 @@ export const updateIncome = async (
     res.status(400).json({ error: error.message });
   }
 };
+
+export const getAllIncomeNotifications = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  try {
+    const currentUserId = getUserId(req);
+    const incomeNotifications = await getIncomeNotifications(currentUserId);
+    return res.status(200).json(incomeNotifications);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+

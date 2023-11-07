@@ -48,7 +48,9 @@ export const isOwner = async (
       throw Error("Not Authorized, no token");
     }
 
+   
     if (currentUserId.toString() !== id) {
+     
       res.status(403);
       throw Error("Not Authorized");
     }
