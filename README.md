@@ -1,5 +1,5 @@
 # expense-tracker
-A Nodejs with typescript and Mongodb project built to track income and expenses.
+A Nodejs with typescript and Mongodb project built to track income and expenses and prompt notifications
 
 ## Environment Variables
 
